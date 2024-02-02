@@ -1,0 +1,122 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+class Student {
+    String studentId;
+    String name;
+    Map<String, List<String>> courses = new HashMap<>();
+
+    Student(String studentId, String name) {
+        this.studentId = studentId;
+        this.name = name;
+    }
+}
+
+class StudentInformationSystem {
+    Map<String, Student> students = new HashMap<>();
+
+    void registerStudent(String studentId, String name) {
+        Student student = new Student(studentId, name);
+        students.put(studentId, student);
+    }
+
+    void enrollCourse(String studentId, String course) {
+        if (students.containsKey(studentId)) {
+            Student student = students.get(studentId);
+            List<String> enrolledCourses = student.courses.computeIfAbsent(course, k -> new ArrayList<>());
+            enrolledCourses.add("In Progress");
+        } else {
+            System.out.println("Student not found.");
+        }
+    }
+
+    void enterGrade(String studentId, String course, String grade) {
+        if (students.containsKey(studentId)) {
+            Student student = students.get(studentId);
+            if (student.courses.containsKey(course)) {
+                List<String> enrolledCourses = student.courses.get(course);
+                enrolledCourses.clear();
+                enrolledCourses.add(grade);
+            } else {
+                System.out.println("Course not found.");
+            }
+        } else {
+            System.out.println("Student not found.");
+        }
+    }
+
+    void generateTranscript(String studentId) {
+        if (students.containsKey(studentId)) {
+            Student student = students.get(studentId);
+            System.out.println("Transcript for " + student.name + " (ID: " + student.studentId + ")");
+            for (Map.Entry<String, List<String>> entry : student.courses.entrySet()) {
+                System.out.println(entry.getKey() + ": " + String.join(", ", entry.getValue()));
+            }
+        } else {
+            System.out.println("Student not found.");
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        StudentInformationSystem sis = new StudentInformationSystem();
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("1. Register Student");
+            System.out.println("2. Enroll in Course");
+            System.out.println("3. Enter Grade");
+            System.out.println("4. Generate Transcript");
+            System.out.println("5. Exit");
+
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume the newline character
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter student ID: ");
+                    String studentId = scanner.nextLine();
+                    System.out.print("Enter student name: ");
+                    String name = scanner.nextLine();
+                    sis.registerStudent(studentId, name);
+                    break;
+
+                case 2:
+                    System.out.print("Enter student ID: ");
+                    studentId = scanner.nextLine();
+                    System.out.print("Enter course name: ");
+                    String course = scanner.nextLine();
+                    sis.enrollCourse(studentId, course);
+                    break;
+
+                    case 3:
+                    System.out.print("Enter student ID: ");
+                    studentId = scanner.nextLine();
+                    System.out.print("Enter course name: ");
+                    course = scanner.nextLine();
+                    System.out.print("Enter grade: ");
+                    String grade = scanner.nextLine();
+                    sis.enterGrade(studentId, course, grade);
+                    break;
+
+                case 4:
+                    System.out.print("Enter student ID: ");
+                    studentId = scanner.nextLine();
+                    sis.generateTranscript(studentId);
+                    break;
+
+                case 5:
+                    System.out.println("Exiting...");
+                    System.exit(0);
+
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
