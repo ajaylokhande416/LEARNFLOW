@@ -1,0 +1,157 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+class Movie {
+    private String movieId;
+    private String title;
+    private String genre;
+
+    public Movie(String movieId, String title, String genre) {
+        this.movieId = movieId;
+        this.title = title;
+        this.genre = genre;
+    }
+
+    public String getMovieId() {
+        return movieId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+}
+
+class Theater {
+    private String theaterId;
+    private String name;
+    private Map<String, Movie> movies;
+    private Map<String, boolean[]> seatAvailability;
+
+    public Theater(String theaterId, String name) {
+        this.theaterId = theaterId;
+        this.name = name;
+        this.movies = new HashMap<>();
+        this.seatAvailability = new HashMap<>();
+    }
+
+    public String getTheaterId() {
+        return theaterId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void addMovie(Movie movie, int totalSeats) {
+        movies.put(movie.getMovieId(), movie);
+        seatAvailability.put(movie.getMovieId(), new boolean[totalSeats]);
+    }
+
+    public Map<String, Movie> getMovies() {
+        return movies;
+    }
+
+    public boolean bookTicket(String movieId, int seatNumber) {
+        if (movies.containsKey(movieId)) {
+            boolean[] seats = seatAvailability.get(movieId);
+            if (seatNumber > 0 && seatNumber <= seats.length && !seats[seatNumber - 1]) {
+                seats[seatNumber - 1] = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean cancelTicket(String movieId, int seatNumber) {
+        if (movies.containsKey(movieId)) {
+            boolean[] seats = seatAvailability.get(movieId);
+            if (seatNumber > 0 && seatNumber <= seats.length && seats[seatNumber - 1]) {
+                seats[seatNumber - 1] = false;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean[] getSeatAvailability(String movieId) {
+        return seatAvailability.getOrDefault(movieId, new boolean[0]);
+    }
+}
+
+public class MovieTicketBookingSystem {
+    public static void main(String[] args) {
+        Map<String, Theater> theaters = new HashMap<>();
+        Scanner scanner = new Scanner(System.in);
+
+        // Example: Creating theaters and movies
+        Theater theater1 = new Theater("T1", "Cineplex");
+        theater1.addMovie(new Movie("M1", "Inception", "Sci-Fi"), 10);
+        theater1.addMovie(new Movie("M2", "The Shawshank Redemption", "Drama"), 15);
+
+        theaters.put(theater1.getTheaterId(), theater1);
+
+        // Example: Browsing movies
+        System.out.println("Available Theaters:");
+        for (Theater theater : theaters.values()) {
+            System.out.println(theater.getTheaterId() + " - " + theater.getName());
+        }
+
+        System.out.print("\nEnter theater ID: ");
+        String theaterId = scanner.nextLine();
+
+        if (theaters.containsKey(theaterId)) {
+            Theater selectedTheater = theaters.get(theaterId);
+
+            System.out.println("\nAvailable Movies:");
+            for (Movie movie : selectedTheater.getMovies().values()) {
+                System.out.println(movie.getMovieId() + " - " + movie.getTitle() + " (" + movie.getGenre() + ")");
+            }
+
+            System.out.print("\nEnter movie ID: ");
+            String movieId = scanner.nextLine();
+
+            if (selectedTheater.getMovies().containsKey(movieId)) {
+                // Example: Booking tickets
+                boolean[] seatAvailability = selectedTheater.getSeatAvailability(movieId);
+                System.out.println("\nSeat Availability:");
+                for (int i = 0; i < seatAvailability.length; i++) {
+                    System.out.print((i + 1) + ": " + (seatAvailability[i] ? "X " : "O "));
+                }
+
+                System.out.print("\nEnter seat number: ");
+                int seatNumber = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline character
+
+                if (selectedTheater.bookTicket(movieId, seatNumber)) {
+                    System.out.println("Ticket booked successfully!");
+                } else {
+                    System.out.println("Seat not available or invalid seat number.");
+                }
+
+                // Example: Canceling tickets
+                System.out.print("\nEnter seat number to cancel (0 to skip): ");
+                int cancelSeatNumber = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline character
+
+                if (cancelSeatNumber > 0) {
+                    if (selectedTheater.cancelTicket(movieId, cancelSeatNumber)) {
+                        System.out.println("Ticket canceled successfully.");
+                    } else {
+                        System.out.println("Invalid seat number or seat not booked.");
+                    }
+                }
+
+            } else {
+                System.out.println("Invalid movie ID.");
+            }
+
+        } else {
+            System.out.println("Invalid theater ID.");
+        }
+    }
+}
